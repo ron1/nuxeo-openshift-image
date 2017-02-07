@@ -10,7 +10,7 @@ Or to pass some custom env variables ( see docker-entrypoint.sh for what you can
 $oc new-app https://github.com/nuxeo/nuxeo-openshift-image.git  
 -e NUXEO_TEMPLATES=default,mongodb
 -e NUXEO_CUSTOM_PARAM=nuxeo.mongodb.server=mongodb://admin:nuxeo@mongodb:27017
--e NUXEO_PACKAGES=nuxeo-web-u
+-e NUXEO_PACKAGES=nuxeo-web-ui
 ```
 
 ## About Nuxeo
