@@ -1,9 +1,15 @@
-This is a modified Nuxeo Docker image to match the security requirements of OpenShift v3.
+These are sample modified Nuxeo Docker images(Debian and Centos based) to match the security requirements of OpenShift v3.
+For the official supported Docker images, go to: https://github.com/nuxeo/docker-nuxeo
 
 To create a new application in OpenShift from this use:
 ```
-$oc new-app https://github.com/nuxeo/nuxeo-openshift-image.git 
+$oc new-app https://github.com/nuxeo/nuxeo-openshift-image.git --context-dir=debian 
 ``` 
+or
+
+```
+$oc new-app https://github.com/nuxeo/nuxeo-openshift-image.git --context-dir=centos
+```
 
 Or to pass some custom env variables ( see docker-entrypoint.sh for what you can do) 
 ```
