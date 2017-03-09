@@ -17,13 +17,17 @@ ENV NUXEO_USER nuxeo
 RUN useradd -m -d /home/$NUXEO_USER -s /bin/bash $NUXEO_USER
 
 #Add repositories need it for ffmpeg2theora and ffmpeg
-RUN wget https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
+ARG EPEL_RPM_URL=https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
+ARG NUX_GPG_KEY_URL=http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro
+ARG NUX_DEXTOP_RPM_URL=http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm
+RUN wget ${EPEL_RPM_URL} \
     && rpm -Uvh epel-release-latest-7*.rpm \
-    && rpm --import http://li.nux.ro/download/nux/RPM-GPG-KEY-nux.ro \
-    && rpm -Uvh http://li.nux.ro/download/nux/dextop/el7/x86_64/nux-dextop-release-0-1.el7.nux.noarch.rpm
+    && rpm --import ${NUX_GPG_KEY_URL} \
+    && rpm -Uvh ${NUX_DEXTOP_RPM_URL}
 
 ## must find another way to install it, need it for ffmpeg
-RUN rpm -Uvh ftp://ftp.pbone.net/mirror/li.nux.ro/download/nux/dextop/retired/libfribidi-0.19.2-3.el7.nux.x86_64.rpm
+ARG NUX_DEXTOP_FRIBIDI_RPM_URL=ftp://ftp.pbone.net/mirror/li.nux.ro/download/nux/dextop/retired/libfribidi-0.19.2-3.el7.nux.x86_64.rpm
+RUN rpm -Uvh ${NUX_DEXTOP_FRIBIDI_RPM_URL}
 
 # enable repo for libreoffice
 RUN yum-config-manager --enable rhel-7-server-optional-rpms
@@ -42,12 +46,13 @@ RUN yum -y upgrade && yum -y install \
  && rm -rf /var/lib/apt/lists/*
 
 ENV NUXEO_VERSION 8.10
-ENV NUXEO_MD5 29e67a19bba54099093b51d892926be1
 ENV NUXEO_HOME /opt/nuxeo/server
 
 # Add distribution
-RUN curl -fsSL "http://cdn.nuxeo.com/nuxeo-${NUXEO_VERSION}/nuxeo-server-${NUXEO_VERSION}-tomcat.zip" -o /tmp/nuxeo-distribution-tomcat.zip \
-    && echo "$NUXEO_MD5 /tmp/nuxeo-distribution-tomcat.zip" | md5sum -c - \
+ARG NUXEO_MD5=29e67a19bba54099093b51d892926be1
+ARG NUXEO_DIST_URL=http://cdn.nuxeo.com/nuxeo-${NUXEO_VERSION}/nuxeo-server-${NUXEO_VERSION}-tomcat.zip
+RUN curl -fsSL "${NUXEO_DIST_URL}" -o /tmp/nuxeo-distribution-tomcat.zip \
+    && echo "${NUXEO_MD5} /tmp/nuxeo-distribution-tomcat.zip" | md5sum -c - \
     && mkdir -p /tmp/nuxeo-distribution $(dirname $NUXEO_HOME) \
     && unzip -q -d /tmp/nuxeo-distribution /tmp/nuxeo-distribution-tomcat.zip \
     && DISTDIR=$(/bin/ls /tmp/nuxeo-distribution | head -n 1) \
@@ -72,11 +77,10 @@ RUN mkdir /var/lib/nuxeo \
 && chmod a+x $NUXEO_HOME/bin/*ctl $NUXEO_HOME/bin/*.sh
 
 USER nuxeo
+
 WORKDIR $NUXEO_HOME
 COPY docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]
 EXPOSE 8080
 EXPOSE 8787
 CMD ["nuxeoctl","console"]
-
-
